@@ -60,5 +60,15 @@ const TEST_6 = [
   { q: "Bu işaret ne anlama gelir?", img: "isaretler/mutcd-d9-2.svg", choices: ["Hastane", "Benzin istasyonu", "Otel"], correct: 0,
     explain: "Mavi levha yakında hastane olduğunu gösterir; acil durumda yön bulmanıza yardımcı olur." },
   { q: "Bu işaret ne anlama gelir?", img: "isaretler/i-5.svg", choices: ["5. çıkış", "5 numaralı eyaletler arası otoyol", "Hız sınırı 5"], correct: 1,
-    explain: "Kırmızı-beyaz-mavi kalkan, 5 numaralı eyaletler arası otoyolu (Interstate 5) gösterir." }
+    explain: "Kırmızı-beyaz-mavi kalkan, 5 numaralı eyaletler arası otoyolu (Interstate 5) gösterir." },
+  { q: "Bu işaret ne anlama gelir?", img: "isaretler/mutcd-r2-1.svg", choices: ["Hız sınırı", "Önerilen hız", "Asgari hız"], correct: 0,
+    explain: "Bu levha o yolda izin verilen en yüksek hızı gösterir; bu hızı aşamazsınız." },
+  { q: "Bu işaret ne anlama gelir?", img: "isaretler/mutcd-r4-7.svg", choices: ["Solda kalın", "Sağda kalın", "Şerit değiştirin"], correct: 1,
+    explain: "Bu levha önünüzdeki engelin veya ayırıcının sağından geçmeniz gerektiğini gösterir." },
+  { q: "Bu işaret ne anlama gelir?", img: "isaretler/mutcd-w1-5.svg", choices: ["Keskin viraj", "Kaygan yol", "Kıvrımlı yol"], correct: 2,
+    explain: "Önünüzde art arda birkaç kıvrım olduğunu bildirir; hızınızı düşürüp dikkatli olun." },
+  { q: "Bu işaret ne anlama gelir?", img: "isaretler/mutcd-r15-1.svg", choices: ["Tren istasyonu", "Demiryolu geçidi", "Metro durağı"], correct: 1,
+    explain: "Bu çapraz işaret demiryolu geçidini gösterir; trenlere yol verin ve geçmeden önce her iki yöne bakın." },
+  { q: "Bu işaret ne anlama gelir?", img: "isaretler/mutcd-r6-1.svg", choices: ["Girilmez", "Çift yönlü trafik", "Tek yön"], correct: 2,
+    explain: "Bu yolda trafik yalnızca ok yönünde akar; ters yönde gitmek yasaktır." }
 ];
