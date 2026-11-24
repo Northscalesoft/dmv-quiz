@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
 <title>California DMV Bilgi Testi — Türkçe Deneme Sınavı</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -64,6 +65,16 @@
   .review-item .ra { color: #16a34a; }
   .review-item .ry { color: #dc2626; }
   .footer { max-width: 640px; margin: 16px auto 0; color: #7a8794; font-size: 13px; text-align: center; }
+  .test-grid { display: flex; flex-direction: column; gap: 10px; }
+  .test-btn {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+    width: 100%; text-align: left; font-size: 16px; font-weight: 700;
+    padding: 14px 16px; border: 2px solid #d7dee6; border-radius: 12px;
+    background: #fff; color: #1c2733; cursor: pointer;
+  }
+  .test-btn:hover { border-color: #2563eb; background: #f0f5ff; }
+  .test-btn span { font-size: 14px; color: #5b6b7a; font-weight: 400; }
+  .select-note { margin-top: 14px; font-size: 14px; color: #5b6b7a; }
   .hidden { display: none; }
   @media (max-width: 560px) {
     body { padding: 12px 10px 36px; }
@@ -78,9 +89,20 @@
 
 <div class="card" id="quiz-card">
   <h1>California DMV Bilgi Testi</h1>
-  <p class="subtitle">Türkçe deneme sınavı — 36 soru, gerçek sınavla aynı sayıda. Cevap verince doğru mu yanlış mı hemen görürsün, sonra sonraki soruya geçersin.</p>
+  <p class="subtitle">Türkçe deneme sınavı — 5 farklı test, her biri 36 soru (gerçek sınavla aynı). Bir test seç, cevap verince doğru mu yanlış mı hemen görürsün, sonra sonraki soruya geçersin.</p>
 
-  <div id="quiz-area">
+  <div id="select-area">
+    <div class="test-grid">
+      <button class="test-btn" data-test="1" type="button"><b>Test 1</b><span>Karışık — kurallar, işaretler, rakamlar</span></button>
+      <button class="test-btn" data-test="2" type="button"><b>Test 2</b><span>Trafik levhaları ağırlıklı</span></button>
+      <button class="test-btn" data-test="3" type="button"><b>Test 3</b><span>Geçiş hakkı, park, şerit çizgileri, ışıklar</span></button>
+      <button class="test-btn" data-test="4" type="button"><b>Test 4</b><span>Rakamlar, hız sınırları, alkol, güvenli sürüş</span></button>
+      <button class="test-btn" data-test="5" type="button"><b>Test 5</b><span>Otoyol, yolu paylaşma, kaza sonrası</span></button>
+    </div>
+    <p class="select-note">Her test 36 soru, baraj 30 doğru — gerçek sınavla aynı.</p>
+  </div>
+
+  <div id="quiz-area" class="hidden">
     <div class="progress-wrap">
       <div class="progress-label"><span id="progress-text">Soru 1 / 20</span><span id="score-text">Doğru: 0</span></div>
       <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
@@ -98,14 +120,19 @@
     <div class="review" id="review"></div>
     <div style="text-align:center;">
       <button class="btn" id="restart-btn">Tekrar Başla</button>
+      <button class="btn secondary" id="back-btn">Test Seçimine Dön</button>
     </div>
   </div>
 </div>
 
 <p class="footer">Sorular, California Driver Handbook (DL 600) konularından hazırlanmıştır. Gerçek sınav İngilizce yapılır; 18 yaş ve üzeri için 36 soru, 30 doğru ile geçilir. Bu deneme konuyu Türkçe öğrenmek içindir.</p>
 
+<script src="tests-data-2.js"></script>
+<script src="tests-data-3.js"></script>
+<script src="tests-data-4.js"></script>
+<script src="tests-data-5.js"></script>
 <script>
-const QUESTIONS = [
+let QUESTIONS = [
   { q: "Kaliforniya'da 21 yaş ve üzeri sürücüler için yasal alkol sınırı (BAC) nedir?",
     choices: ["%0,05", "%0,08", "%0,10"], correct: 1,
     explain: "21 yaş ve üzeri için sınır %0,08'dir. 21 yaş altı için %0,01, ticari sürücüler için %0,04 uygulanır." },
@@ -216,6 +243,33 @@ const QUESTIONS = [
     explain: "İlk DUI'da bile para cezası, ehliyetin askıya alınması ve zorunlu DUI eğitim programı uygulanır; tekrarında cezalar ağırlaşır." }
 ];
 
+const TESTS = { 1: QUESTIONS, 2: TEST_2, 3: TEST_3, 4: TEST_4, 5: TEST_5 };
+let currentTest = 1;
+
+function startTest(n) {
+  currentTest = n;
+  QUESTIONS = TESTS[n];
+  current = 0; score = 0; answers = [];
+  document.getElementById('select-area').classList.add('hidden');
+  document.getElementById('result-area').classList.add('hidden');
+  document.getElementById('quiz-area').classList.remove('hidden');
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function backToSelect() {
+  document.getElementById('quiz-area').classList.add('hidden');
+  document.getElementById('result-area').classList.add('hidden');
+  document.getElementById('select-area').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.querySelectorAll('.test-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () { startTest(parseInt(btn.dataset.test, 10)); });
+});
+
+document.getElementById('back-btn').addEventListener('click', backToSelect);
+
 const PASS_MARK = 30; // Gerçek sınavla aynı: 36 soruda 30 doğru
 let current = 0;
 let score = 0;
@@ -231,7 +285,7 @@ const progressFill = document.getElementById('progress-fill');
 
 function renderQuestion() {
   const item = QUESTIONS[current];
-  progressText.textContent = 'Soru ' + (current + 1) + ' / ' + QUESTIONS.length;
+  progressText.textContent = 'Test ' + currentTest + ' — Soru ' + (current + 1) + ' / ' + QUESTIONS.length;
   scoreText.textContent = 'Doğru: ' + score;
   progressFill.style.width = (current / QUESTIONS.length * 100) + '%';
   qText.textContent = item.q;
