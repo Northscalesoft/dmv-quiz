@@ -75,6 +75,13 @@
   .test-btn:hover { border-color: #2563eb; background: #f0f5ff; }
   .test-btn span { font-size: 14px; color: #5b6b7a; font-weight: 400; }
   .select-note { margin-top: 14px; font-size: 14px; color: #5b6b7a; }
+  .history { margin-top: 22px; border-top: 1px solid #e4e9ee; padding-top: 16px; }
+  .history h2 { font-size: 17px; margin-bottom: 8px; }
+  .history-item { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; padding: 8px 0; border-top: 1px solid #eef2f5; }
+  .history-item .hp { color: #16a34a; font-weight: 700; }
+  .history-item .hf { color: #dc2626; font-weight: 700; }
+  .history-clear { margin-top: 12px; padding: 9px 18px; font-size: 14px; }
+  .history-note { font-size: 13px; color: #7a8794; margin-top: 8px; }
   .q-img { display: block; max-width: 200px; max-height: 200px; margin: 0 auto 16px; }
   .hidden { display: none; }
   @media (max-width: 560px) {
@@ -102,6 +109,12 @@
       <button class="test-btn" data-test="6" type="button"><b>Test 6 — İşaretler</b><span>Sadece işaretler — resimli sorular</span></button>
     </div>
     <p class="select-note">Test 1–5: 36 soru, baraj 30 doğru. Test 6 (İşaretler): 36 soru, baraj 30 doğru.</p>
+    <div id="history-area" class="history hidden">
+      <h2>Sonuçların</h2>
+      <div id="history-list"></div>
+      <button class="btn secondary history-clear" id="clear-history-btn" type="button">Sonuçları Temizle</button>
+      <p class="history-note">Sonuçlar yalnızca bu cihazda saklanır.</p>
+    </div>
   </div>
 
   <div id="quiz-area" class="hidden">
@@ -265,6 +278,7 @@ function backToSelect() {
   document.getElementById('quiz-area').classList.add('hidden');
   document.getElementById('result-area').classList.add('hidden');
   document.getElementById('select-area').classList.remove('hidden');
+  renderHistory();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -340,6 +354,7 @@ function showResult() {
   progressFill.style.width = '100%';
   const passMark = Math.ceil(QUESTIONS.length * 0.83);
   const passed = score >= passMark;
+  saveAttempt(passed);
   document.getElementById('result-score').textContent = score + ' / ' + QUESTIONS.length;
   const verdict = document.getElementById('result-verdict');
   verdict.textContent = passed ? '✓ Geçtin!' : '✗ Bu sefer olmadı';
@@ -371,7 +386,45 @@ document.getElementById('restart-btn').addEventListener('click', function () {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
+const HISTORY_KEY = 'dmv-quiz-history';
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch (e) { return []; }
+}
+function saveAttempt(passed) {
+  try {
+    const h = loadHistory();
+    h.push({ test: currentTest, score: score, total: QUESTIONS.length, pass: passed, date: new Date().toISOString() });
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(-30)));
+  } catch (e) {}
+}
+function renderHistory() {
+  const h = loadHistory();
+  const area = document.getElementById('history-area');
+  if (h.length === 0) { area.classList.add('hidden'); return; }
+  const best = {};
+  const last = {};
+  h.forEach(function (a) {
+    if (!best[a.test] || a.score > best[a.test].score) best[a.test] = a;
+    last[a.test] = a;
+  });
+  const months = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+  let html = '';
+  Object.keys(best).sort(function (a, b) { return a - b; }).forEach(function (t) {
+    const b = best[t], l = last[t];
+    const d = new Date(l.date);
+    const ds = d.getDate() + ' ' + months[d.getMonth()];
+    html += '<div class="history-item"><span>Test ' + t + ' — en iyi <span class="' + (b.pass ? 'hp' : 'hf') + '">' + b.score + '/' + b.total + '</span></span><span>son: ' + l.score + '/' + l.total + ' · ' + ds + '</span></div>';
+  });
+  document.getElementById('history-list').innerHTML = html;
+  area.classList.remove('hidden');
+}
+document.getElementById('clear-history-btn').addEventListener('click', function () {
+  try { localStorage.removeItem(HISTORY_KEY); } catch (e) {}
+  renderHistory();
+});
+
 renderQuestion();
+renderHistory();
 </script>
 </body>
 </html>
