@@ -75,6 +75,7 @@
   .test-btn:hover { border-color: #2563eb; background: #f0f5ff; }
   .test-btn span { font-size: 14px; color: #5b6b7a; font-weight: 400; }
   .select-note { margin-top: 14px; font-size: 14px; color: #5b6b7a; }
+  .q-img { display: block; max-width: 200px; max-height: 200px; margin: 0 auto 16px; }
   .hidden { display: none; }
   @media (max-width: 560px) {
     body { padding: 12px 10px 36px; }
@@ -89,7 +90,7 @@
 
 <div class="card" id="quiz-card">
   <h1>California DMV Bilgi Testi</h1>
-  <p class="subtitle">Türkçe deneme sınavı — 5 farklı test, her biri 36 soru (gerçek sınavla aynı). Bir test seç, cevap verince doğru mu yanlış mı hemen görürsün, sonra sonraki soruya geçersin.</p>
+  <p class="subtitle">Türkçe deneme sınavı — 6 farklı test (Test 1–5: 36 soru, Test 6 İşaretler: 31 resimli soru). Bir test seç, cevap verince doğru mu yanlış mı hemen görürsün, sonra sonraki soruya geçersin.</p>
 
   <div id="select-area">
     <div class="test-grid">
@@ -98,8 +99,9 @@
       <button class="test-btn" data-test="3" type="button"><b>Test 3</b><span>Geçiş hakkı, park, şerit çizgileri, ışıklar</span></button>
       <button class="test-btn" data-test="4" type="button"><b>Test 4</b><span>Rakamlar, hız sınırları, alkol, güvenli sürüş</span></button>
       <button class="test-btn" data-test="5" type="button"><b>Test 5</b><span>Otoyol, yolu paylaşma, kaza sonrası</span></button>
+      <button class="test-btn" data-test="6" type="button"><b>Test 6 — İşaretler</b><span>Sadece işaretler — resimli sorular</span></button>
     </div>
-    <p class="select-note">Her test 36 soru, baraj 30 doğru — gerçek sınavla aynı.</p>
+    <p class="select-note">Test 1–5: 36 soru, baraj 30 doğru. Test 6 (İşaretler): 31 soru, baraj 26 doğru.</p>
   </div>
 
   <div id="quiz-area" class="hidden">
@@ -107,6 +109,7 @@
       <div class="progress-label"><span id="progress-text">Soru 1 / 20</span><span id="score-text">Doğru: 0</span></div>
       <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
     </div>
+    <img id="question-img" class="q-img hidden" alt="Trafik işareti">
     <div class="question" id="question-text"></div>
     <div class="choices" id="choices"></div>
     <div class="feedback" id="feedback"></div>
@@ -131,6 +134,7 @@
 <script src="tests-data-3.js"></script>
 <script src="tests-data-4.js"></script>
 <script src="tests-data-5.js"></script>
+<script src="tests-data-6.js"></script>
 <script>
 let QUESTIONS = [
   { q: "Kaliforniya'da 21 yaş ve üzeri sürücüler için yasal alkol sınırı (BAC) nedir?",
@@ -243,7 +247,7 @@ let QUESTIONS = [
     explain: "İlk DUI'da bile para cezası, ehliyetin askıya alınması ve zorunlu DUI eğitim programı uygulanır; tekrarında cezalar ağırlaşır." }
 ];
 
-const TESTS = { 1: QUESTIONS, 2: TEST_2, 3: TEST_3, 4: TEST_4, 5: TEST_5 };
+const TESTS = { 1: QUESTIONS, 2: TEST_2, 3: TEST_3, 4: TEST_4, 5: TEST_5, 6: TEST_6 };
 let currentTest = 1;
 
 function startTest(n) {
@@ -289,6 +293,9 @@ function renderQuestion() {
   scoreText.textContent = 'Doğru: ' + score;
   progressFill.style.width = (current / QUESTIONS.length * 100) + '%';
   qText.textContent = item.q;
+  const qImg = document.getElementById('question-img');
+  if (item.img) { qImg.src = item.img; qImg.classList.remove('hidden'); }
+  else { qImg.removeAttribute('src'); qImg.classList.add('hidden'); }
   choicesEl.innerHTML = '';
   feedbackEl.className = 'feedback';
   feedbackEl.innerHTML = '';
@@ -331,14 +338,15 @@ function showResult() {
   const resultArea = document.getElementById('result-area');
   resultArea.classList.remove('hidden');
   progressFill.style.width = '100%';
-  const passed = score >= PASS_MARK;
+  const passMark = Math.ceil(QUESTIONS.length * 0.83);
+  const passed = score >= passMark;
   document.getElementById('result-score').textContent = score + ' / ' + QUESTIONS.length;
   const verdict = document.getElementById('result-verdict');
   verdict.textContent = passed ? '✓ Geçtin!' : '✗ Bu sefer olmadı';
   verdict.className = 'result-verdict ' + (passed ? 'pass' : 'fail');
   document.getElementById('result-note').textContent = passed
     ? 'Gerçek sınavın barajı %83 — bu tempoyla geçersin. Yanlışların varsa aşağıdan tekrar et.'
-    : 'Baraj 30 doğru. Yanlış soruları aşağıdan gözden geçirip tekrar dene.';
+    : 'Baraj ' + passMark + ' doğru. Yanlış soruları aşağıdan gözden geçirip tekrar dene.';
   const wrong = answers.filter(function (a) { return !a.ok; });
   const review = document.getElementById('review');
   if (wrong.length === 0) {
