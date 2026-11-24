@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>California DMV Bilgi Testi — Türkçe Deneme Sınavı</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f2f4f7; color: #1c2733; line-height: 1.5;
+    min-height: 100vh; padding: 20px 14px 48px;
+  }
+  .card {
+    max-width: 640px; margin: 0 auto; background: #fff;
+    border-radius: 16px; padding: 28px 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  h1 { font-size: 24px; line-height: 1.25; margin-bottom: 6px; }
+  .subtitle { color: #5b6b7a; font-size: 15px; margin-bottom: 20px; }
+  .progress-wrap { margin-bottom: 20px; }
+  .progress-label { font-size: 13px; color: #5b6b7a; margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .progress-bar { height: 8px; background: #e4e9ee; border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #2563eb; width: 0%; transition: width .3s ease; }
+  .question { font-size: 19px; font-weight: 700; line-height: 1.4; margin-bottom: 18px; }
+  .choices { display: flex; flex-direction: column; gap: 10px; }
+  .choice {
+    display: block; width: 100%; text-align: left;
+    font-size: 16px; padding: 14px 16px;
+    border: 2px solid #d7dee6; border-radius: 12px;
+    background: #fff; color: #1c2733; cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .choice:hover:not(:disabled) { border-color: #2563eb; background: #f0f5ff; }
+  .choice:disabled { cursor: default; opacity: .85; }
+  .choice.correct { border-color: #16a34a; background: #eafaf0; font-weight: 700; }
+  .choice.wrong { border-color: #dc2626; background: #fdeeee; }
+  .feedback {
+    margin-top: 18px; padding: 14px 16px; border-radius: 12px;
+    font-size: 15px; display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.good { background: #eafaf0; border: 1px solid #16a34a; }
+  .feedback.bad { background: #fdeeee; border: 1px solid #dc2626; }
+  .feedback .verdict { font-weight: 800; font-size: 16px; margin-bottom: 4px; }
+  .feedback .explain { color: #334155; }
+  .btn {
+    display: inline-block; margin-top: 18px; padding: 13px 24px;
+    font-size: 16px; font-weight: 700; color: #fff;
+    background: #2563eb; border: none; border-radius: 12px; cursor: pointer;
+  }
+  .btn:hover { background: #1d4ed8; }
+  .btn.secondary { background: #64748b; }
+  .btn.secondary:hover { background: #475569; }
+  .result-score { font-size: 44px; font-weight: 800; text-align: center; margin: 8px 0 4px; }
+  .result-verdict { text-align: center; font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+  .result-verdict.pass { color: #16a34a; }
+  .result-verdict.fail { color: #dc2626; }
+  .result-note { text-align: center; color: #5b6b7a; font-size: 15px; margin-bottom: 20px; }
+  .review { margin-top: 8px; }
+  .review h2 { font-size: 18px; margin-bottom: 10px; }
+  .review-item { border-top: 1px solid #e4e9ee; padding: 12px 0; font-size: 15px; }
+  .review-item .rq { font-weight: 700; }
+  .review-item .ra { color: #16a34a; }
+  .review-item .ry { color: #dc2626; }
+  .footer { max-width: 640px; margin: 16px auto 0; color: #7a8794; font-size: 13px; text-align: center; }
+  .hidden { display: none; }
+  @media (max-width: 560px) {
+    body { padding: 12px 10px 36px; }
+    .card { padding: 22px 18px; border-radius: 14px; }
+    h1 { font-size: 21px; }
+    .question { font-size: 18px; }
+    .choice { font-size: 16px; padding: 13px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="quiz-card">
+  <h1>California DMV Bilgi Testi</h1>
+  <p class="subtitle">Türkçe deneme sınavı — 36 soru, gerçek sınavla aynı sayıda. Cevap verince doğru mu yanlış mı hemen görürsün, sonra sonraki soruya geçersin.</p>
+
+  <div id="quiz-area">
+    <div class="progress-wrap">
+      <div class="progress-label"><span id="progress-text">Soru 1 / 20</span><span id="score-text">Doğru: 0</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+    <div class="question" id="question-text"></div>
+    <div class="choices" id="choices"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn hidden" id="next-btn">Sonraki Soru →</button>
+  </div>
+
+  <div id="result-area" class="hidden">
+    <div class="result-score" id="result-score"></div>
+    <div class="result-verdict" id="result-verdict"></div>
+    <p class="result-note" id="result-note"></p>
+    <div class="review" id="review"></div>
+    <div style="text-align:center;">
+      <button class="btn" id="restart-btn">Tekrar Başla</button>
+    </div>
+  </div>
+</div>
+
+<p class="footer">Sorular, California Driver Handbook (DL 600) konularından hazırlanmıştır. Gerçek sınav İngilizce yapılır; 18 yaş ve üzeri için 36 soru, 30 doğru ile geçilir. Bu deneme konuyu Türkçe öğrenmek içindir.</p>
+
+<script>
+const QUESTIONS = [
+  { q: "Kaliforniya'da 21 yaş ve üzeri sürücüler için yasal alkol sınırı (BAC) nedir?",
+    choices: ["%0,05", "%0,08", "%0,10"], correct: 1,
+    explain: "21 yaş ve üzeri için sınır %0,08'dir. 21 yaş altı için %0,01, ticari sürücüler için %0,04 uygulanır." },
+  { q: "Dönüş yapmadan önce sinyalinizi en az kaç feet önceden vermelisiniz?",
+    choices: ["50 feet", "100 feet", "200 feet"], correct: 1,
+    explain: "Dönüşten en az 100 feet önce sinyal verilmelidir." },
+  { q: "Kaldırıma paralel park ederken aracınız kaldırımdan en fazla ne kadar uzakta olabilir?",
+    choices: ["18 inç (yaklaşık 45 cm)", "12 inç", "24 inç"], correct: 0,
+    explain: "Paralel parkta araç kaldırıma en fazla 18 inç uzakta olmalıdır." },
+  { q: "Yangın musluğuna (hidrant) en az kaç feet uzakta park etmelisiniz?",
+    choices: ["5 feet", "10 feet", "15 feet"], correct: 2,
+    explain: "Yangın musluğunun 15 feet yakınına park etmek yasaktır." },
+  { q: "Önünüzdeki aracı takip ederken güvenli mesafe kuralı nedir?",
+    choices: ["1 saniye kuralı", "2 saniye kuralı", "3 saniye kuralı"], correct: 2,
+    explain: "Öndeki araç bir noktayı geçtikten sonra sizin o noktaya en az 3 saniyede varmanız gerekir. Yağmurda ve kamyon arkasında daha fazla bırakın." },
+  { q: "Kaliforniya'da yerleşim bölgesinde, başka bir levha yoksa hız sınırı kaç mil/saattir?",
+    choices: ["25 mil/saat", "35 mil/saat", "15 mil/saat"], correct: 0,
+    explain: "Yerleşim ve iş bölgelerinde varsayılan sınır 25 mil/saattir. Otoyollarda genellikle 65 mil/saattir." },
+  { q: "Kırmızı ışıkta sağa dönüş yapmak isterseniz ne yapmalısınız?",
+    choices: ["Durmadan dönebilirsiniz", "Tamamen durduktan sonra, yasak levhası yoksa dönebilirsiniz", "Asla sağa dönemezsiniz"], correct: 1,
+    explain: "Kırmızı ışıkta sağa dönüş, tamamen durup yolu kontrol ettikten sonra serbesttir — yasaklayan bir levha yoksa." },
+  { q: "Yanıp sönen kırmızı ışık ne anlama gelir?",
+    choices: ["Dikkatli geçin", "Dur işaretiyle aynıdır: tamamen durun", "Yavaşlayın"], correct: 1,
+    explain: "Yanıp sönen kırmızı ışık, dur işareti gibidir: tamamen durup yol güvenliyse geçersiniz. Yanıp sönen sarı ise dikkatli geçin demektir." },
+  { q: "Okul servisi kırmızı ışıkları yanıp sönerek durmuşsa ne yapmalısınız?",
+    choices: ["Her iki yönden gelen araçlar da durmalıdır (bölünmüş yol hariç)", "Sadece aynı yönde gidenler durmalıdır", "Yavaşça geçebilirsiniz"], correct: 0,
+    explain: "Okul servisi öğrenci indirirken her iki yönden gelen trafik de durmak zorundadır; istisna, ortası bölünmüş (fiziksel ayraçlı) yollardır." },
+  { q: "Farlarınızı ne zaman yakmalısınız?",
+    choices: ["Sadece gece yarısından sonra", "Gün batımından 30 dakika sonra – gün doğumundan 30 dakika önce, ve görüş 1.000 feet'in altına düşünce", "Sadece yağmur yağarken"], correct: 1,
+    explain: "Farlar gün batımından 30 dakika sonra ile gün doğumundan 30 dakika önce arasında, görüş mesafesi 1.000 feet'in altına düşünce ve silecek gerektiren hava koşullarında yakılır." },
+  { q: "18 yaşından küçük bir sürücü araç kullanırken telefon kullanabilir mi?",
+    choices: ["Evet, eller serbestse kullanabilir", "Hayır, eller serbest bile olsa kullanamaz", "Sadece kısa mesaj için kullanabilir"], correct: 1,
+    explain: "18 yaş altı sürücüler, eller serbest sistemler dahil, araç kullanırken telefon kullanamaz. Acil durum araması istisnadır." },
+  { q: "Kaliforniya'da 8 yaşından küçük çocuklar araçta nasıl seyahat etmelidir?",
+    choices: ["Ön koltukta oturabilirler", "Arka koltukta çocuk koltuğu veya yükseltici koltukta oturmalıdırlar", "Yetişkinin kucağında taşınabilirler"], correct: 1,
+    explain: "8 yaşından küçük çocuklar arka koltukta, yaş ve boylarına uygun çocuk koltuğu veya yükselticide seyahat etmelidir." },
+  { q: "Kaliforniya'da zorunlu trafik sigortasının asgari limitleri nedir?",
+    choices: ["$15.000 / $30.000 / $5.000", "$10.000 / $20.000 / $5.000", "$25.000 / $50.000 / $10.000"], correct: 0,
+    explain: "Asgari limitler: bir kişinin yaralanması/ölümü için $15.000, bir kazada toplam $30.000, mal hasarı için $5.000." },
+  { q: "Yaya geçidinde bir yaya varsa ne yapmalısınız?",
+    choices: ["Yaya her zaman geçiş hakkına sahiptir, durup yol vermelisiniz", "Araç önce geçer", "Korna çalıp geçmelisiniz"], correct: 0,
+    explain: "Yaya geçidindeki yayanın geçiş hakkı vardır. Kör yayalar (beyaz baston veya rehber köpekli) her durumda önceliklidir." },
+  { q: "Sarı baklava (elmas) şeklindeki trafik levhası ne bildirir?",
+    choices: ["Yasak", "Uyarı", "Yön"], correct: 1,
+    explain: "Sarı elmas levhalar uyarı levhasıdır (viraj, yaya geçidi, yol çalışması vb.). Kırmızı sekizgen dur, ters üçgen yol ver demektir." },
+  { q: "Demiryolu geçidinde raylara en az kaç feet kala durmalısınız?",
+    choices: ["5–25 feet", "15–50 feet", "50–100 feet"], correct: 1,
+    explain: "Tren yaklaşırken rayların 15 ila 50 feet öncesinde durmalısınız ve asla rayların üzerinde durmamalısınız." },
+  { q: "Motosikletlerin iki şerit arasında ilerlemesi (lane splitting) Kaliforniya'da nasıldır?",
+    choices: ["Yasaktır", "Yasaldır", "Sadece 35 mil/saat altında yasaldır"], correct: 1,
+    explain: "Kaliforniya'da motosikletlerin şeritler arasında ilerlemesi yasaldır; sürücüler motosikletlere yeterli alan bırakmalıdır." },
+  { q: "Yokuş yukarı, kaldırım olan bir yerde park ederken ön tekerlekleri nasıl çevirmelisiniz?",
+    choices: ["Kaldırıma doğru", "Kaldırımdan uzağa, sokağa doğru", "Düz bırakmalısınız"], correct: 1,
+    explain: "Yokuş yukarı kaldırım varsa tekerlekler kaldırımdan uzağa çevrilir; yokuş aşağı parkta kaldırıma doğru çevrilir. Böylece araç kayarsa kaldırım durdurur." },
+  { q: "Seyir halindeyken lastiğiniz patlarsa ne yapmalısınız?",
+    choices: ["Sertçe frene basmalısınız", "Direksiyonu sıkıca tutup gazdan yavaşça çekmelisiniz", "Aniden sağa çekmelisiniz"], correct: 1,
+    explain: "Lastik patlayınca direksiyonu sıkıca tutun, gazdan yavaşça çekin ve araç yavaşlayınca kenara çekin. Ani fren aracın kontrolünü kaybettirir." },
+  { q: "U dönüşü hangi durumda yasaktır?",
+    choices: ["Görüş mesafesinin 200 feet'ten az olduğu tepe veya viraj yakınında", "Trafik ışığı olan kavşakta", "Dört yol ağzında"], correct: 0,
+    explain: "U dönüşü; görüşün 200 feet'ten az olduğu tepe/viraj yakınında, iş bölgesinde ve yasak levhası olan yerlerde yasaktır." },
+  { q: "Okul bölgesinde çocuklar varken hız sınırı kaç mil/saattir?",
+    choices: ["15 mil/saat", "25 mil/saat", "35 mil/saat"], correct: 1,
+    explain: "Okul bölgesinde çocuklar varken hız sınırı 25 mil/saattir (başka bir levha yoksa)." },
+  { q: "Yolda çift sarı çizgi varsa ne yapamazsınız?",
+    choices: ["Sollama yapmak için çizgiyi geçemezsiniz", "Sola dönüş için çizgiyi geçemezsiniz", "Şerit değiştiremezsiniz"], correct: 0,
+    explain: "Çift sarı çizgi, her iki yönde de sollama yapmanın yasak olduğunu gösterir. Sola dönüş için (örneğin bir girişe girmek) geçilebilir." },
+  { q: "Elmas işaretli carpool (HOV) şeridini kullanmak için araçta en az kaç kişi olmalıdır?",
+    choices: ["1 kişi (yalnız sürücü)", "2 kişi", "3 kişi"], correct: 1,
+    explain: "Carpool şeridi, sürücü dahil en az 2 kişi bulunan araçlar içindir (başka bir levha yoksa)." },
+  { q: "Kavşağa yaklaşırken ışık sarıya döndüyse ne yapmalısınız?",
+    choices: ["Hızlanıp geçmelisiniz", "Güvenle durabiliyorsanız durmalısınız", "Her zaman durmalısınız"], correct: 1,
+    explain: "Sarı ışık, ışığın kırmızıya döneceği uyarısıdır: güvenle durabiliyorsanız durun; duramayacaksanız dikkatli geçin." },
+  { q: "Arkanızdan siren çalarak bir acil durum aracı (ambulans, itfaiye) yaklaşıyorsa ne yapmalısınız?",
+    choices: ["Hızlanıp önünden kaçmalısınız", "Sağa çekilip durarak yol vermelisiniz", "Olduğunuz yerde durmalısınız"], correct: 1,
+    explain: "Sirenli acil durum araçlarına yol vermelisiniz: sağa çekilin ve durun. Kavşaktaysanız kavşağı geçip sonra sağa çekilin." },
+  { q: "Yağmur başladıktan sonraki ilk dakikalarda yol neden özellikle kaygandır?",
+    choices: ["Yoldaki yağ ve kir suyla karışıp kaygan bir tabaka oluşturur", "Asfalt suyu emer", "Lastikler ıslanınca şişer"], correct: 0,
+    explain: "Yağmurun ilk 10 dakikasında yoldaki yağ ve kir suyla karışır; yol en kaygan halindedir. Hızınızı düşürün ve takip mesafesini artırın." },
+  { q: "Sisli havada hangi farları kullanmalısınız?",
+    choices: ["Uzun (yüksek) farları", "Kısa (alçak) farları", "Farları kapatmalısınız"], correct: 1,
+    explain: "Siste uzun farlar ışığı geri yansıtıp görüşü daha da kötüleştirir; kısa farlar kullanılmalıdır." },
+  { q: "Dört yönlü dur işaretli bir kavşakta iki araç aynı anda gelirse kim önce geçer?",
+    choices: ["Soldaki araç", "Sağdaki araç", "Büyük olan araç"], correct: 1,
+    explain: "Dört yönlü dur kavşağında önce gelen önce geçer; aynı anda gelenlerde sağdaki araç önceliklidir." },
+  { q: "Kaliforniya'da emniyet kemeri kimler için zorunludur?",
+    choices: ["Sadece sürücü için", "Sürücü ve tüm yolcular için", "Sadece ön koltuktakiler için"], correct: 1,
+    explain: "Kaliforniya'da sürücü ve tüm yolcular emniyet kemeri takmak zorundadır." },
+  { q: "18 yaşından büyük bir sürücü araç kullanırken telefonla nasıl konuşabilir?",
+    choices: ["Telefonu elinde tutarak", "Yalnızca eller serbest (hoparlör veya kulaklık) ile", "Hiçbir şekilde konuşamaz"], correct: 1,
+    explain: "18 yaş üstü sürücüler telefonu elde tutarak kullanamaz; yalnızca eller serbest sistemlerle konuşabilir. Mesaj yazmak her yaşta yasaktır." },
+  { q: "Kırmızı ışıkta sola ne zaman dönebilirsiniz?",
+    choices: ["Her zaman dönebilirsiniz", "Tek yönlü sokaktan tek yönlü sokağa, tamamen durduktan sonra", "Asla sola dönemezsiniz"], correct: 1,
+    explain: "Kırmızı ışıkta sola dönüş yalnızca tek yönlü sokaktan tek yönlü sokağa, tamamen durduktan sonra serbesttir." },
+  { q: "Yokuş aşağı, kaldırım olan bir yerde park ederken ön tekerlekleri nasıl çevirmelisiniz?",
+    choices: ["Kaldırıma doğru", "Kaldırımdan uzağa, sokağa doğru", "Düz bırakmalısınız"], correct: 0,
+    explain: "Yokuş aşağı parkta tekerlekler kaldırıma doğru çevrilir; araç kayarsa kaldırım onu durdurur." },
+  { q: "Bir bisikletliyi geçerken en az kaç feet mesafe bırakmalısınız?",
+    choices: ["1 feet", "3 feet", "5 feet"], correct: 1,
+    explain: "Kaliforniya'da bisikletliyi geçerken en az 3 feet mesafe bırakmak zorunludur; mümkünse şerit değiştirin." },
+  { q: "Yeşil ışıkta sola dönerken ne yapmalısınız?",
+    choices: ["Hemen dönmelisiniz, öncelik sizdedir", "Karşıdan gelen araçlara ve yayalara yol vermelisiniz", "Korna çalıp dönmelisiniz"], correct: 1,
+    explain: "Yeşil ışıkta sola dönerken karşıdan gelen trafiğe ve karşıya geçen yayalara yol vermelisiniz; ancak yeşil ok varsa öncelik sizdedir." },
+  { q: "Orta dönüş şeridinde (center left-turn lane) en fazla kaç feet gidebilirsiniz?",
+    choices: ["100 feet", "200 feet", "500 feet"], correct: 1,
+    explain: "Orta dönüş şeridi yalnızca sola dönüş içindir ve içinde en fazla 200 feet gidilebilir." },
+  { q: "İlk kez alkollü araç kullanırken (DUI) yakalanmanın sonuçları arasında ne vardır?",
+    choices: ["Sadece uyarı alırsınız", "Para cezası, ehliyetin askıya alınması ve zorunlu DUI eğitim programı", "Aracınıza el konur ama ehliyetiniz kalır"], correct: 1,
+    explain: "İlk DUI'da bile para cezası, ehliyetin askıya alınması ve zorunlu DUI eğitim programı uygulanır; tekrarında cezalar ağırlaşır." }
+];
+
+const PASS_MARK = 30; // Gerçek sınavla aynı: 36 soruda 30 doğru
+let current = 0;
+let score = 0;
+let answers = [];
+
+const qText = document.getElementById('question-text');
+const choicesEl = document.getElementById('choices');
+const feedbackEl = document.getElementById('feedback');
+const nextBtn = document.getElementById('next-btn');
+const progressText = document.getElementById('progress-text');
+const scoreText = document.getElementById('score-text');
+const progressFill = document.getElementById('progress-fill');
+
+function renderQuestion() {
+  const item = QUESTIONS[current];
+  progressText.textContent = 'Soru ' + (current + 1) + ' / ' + QUESTIONS.length;
+  scoreText.textContent = 'Doğru: ' + score;
+  progressFill.style.width = (current / QUESTIONS.length * 100) + '%';
+  qText.textContent = item.q;
+  choicesEl.innerHTML = '';
+  feedbackEl.className = 'feedback';
+  feedbackEl.innerHTML = '';
+  nextBtn.classList.add('hidden');
+
+  item.choices.forEach(function (choice, idx) {
+    const btn = document.createElement('button');
+    btn.className = 'choice';
+    btn.type = 'button';
+    btn.textContent = choice;
+    btn.addEventListener('click', function () { answer(idx); });
+    choicesEl.appendChild(btn);
+  });
+}
+
+function answer(idx) {
+  const item = QUESTIONS[current];
+  const buttons = choicesEl.querySelectorAll('.choice');
+  buttons.forEach(function (b) { b.disabled = true; });
+  buttons[item.correct].classList.add('correct');
+  const ok = idx === item.correct;
+  if (!ok) { buttons[idx].classList.add('wrong'); } else { score++; }
+  answers.push({ q: item.q, chosen: idx, correct: item.correct, ok: ok, explain: item.explain });
+  scoreText.textContent = 'Doğru: ' + score;
+  feedbackEl.className = 'feedback show ' + (ok ? 'good' : 'bad');
+  feedbackEl.innerHTML = '<div class="verdict">' + (ok ? '✓ Doğru!' : '✗ Yanlış') + '</div>' +
+    (ok ? '' : '<div>Doğru cevap: <b>' + item.choices[item.correct] + '</b></div>') +
+    '<div class="explain">' + item.explain + '</div>';
+  nextBtn.textContent = (current === QUESTIONS.length - 1) ? 'Sonucu Gör →' : 'Sonraki Soru →';
+  nextBtn.classList.remove('hidden');
+}
+
+nextBtn.addEventListener('click', function () {
+  current++;
+  if (current >= QUESTIONS.length) { showResult(); } else { renderQuestion(); }
+});
+
+function showResult() {
+  document.getElementById('quiz-area').classList.add('hidden');
+  const resultArea = document.getElementById('result-area');
+  resultArea.classList.remove('hidden');
+  progressFill.style.width = '100%';
+  const passed = score >= PASS_MARK;
+  document.getElementById('result-score').textContent = score + ' / ' + QUESTIONS.length;
+  const verdict = document.getElementById('result-verdict');
+  verdict.textContent = passed ? '✓ Geçtin!' : '✗ Bu sefer olmadı';
+  verdict.className = 'result-verdict ' + (passed ? 'pass' : 'fail');
+  document.getElementById('result-note').textContent = passed
+    ? 'Gerçek sınavın barajı %83 — bu tempoyla geçersin. Yanlışların varsa aşağıdan tekrar et.'
+    : 'Baraj 30 doğru. Yanlış soruları aşağıdan gözden geçirip tekrar dene.';
+  const wrong = answers.filter(function (a) { return !a.ok; });
+  const review = document.getElementById('review');
+  if (wrong.length === 0) {
+    review.innerHTML = '<h2>Hepsi doğru — tebrikler!</h2>';
+  } else {
+    let html = '<h2>Yanlış cevapladığın sorular</h2>';
+    wrong.forEach(function (a) {
+      html += '<div class="review-item"><div class="rq">' + a.q + '</div>' +
+        '<div class="ra">Doğru cevap: ' + QUESTIONS.find(function (qq) { return qq.q === a.q; }).choices[a.correct] + '</div>' +
+        '<div>' + a.explain + '</div></div>';
+    });
+    review.innerHTML = html;
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('restart-btn').addEventListener('click', function () {
+  current = 0; score = 0; answers = [];
+  document.getElementById('result-area').classList.add('hidden');
+  document.getElementById('quiz-area').classList.remove('hidden');
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+renderQuestion();
+</script>
+</body>
+</html>
