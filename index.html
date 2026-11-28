@@ -97,7 +97,7 @@
 
 <div class="card" id="quiz-card">
   <h1>California DMV Bilgi Testi</h1>
-  <p class="subtitle">Türkçe deneme sınavı — 6 farklı test (Test 1–5: 36 soru, Test 6 İşaretler: 36 resimli soru). Bir test seç, cevap verince doğru mu yanlış mı hemen görürsün, sonra sonraki soruya geçersin.</p>
+  <p class="subtitle">Türkçe deneme sınavı — 10 farklı test (Test 1–5: 36 soru, Test 6 İşaretler: 36 resimli soru, Test 7–10: 36 soru). Bir test seç, cevap verince doğru mu yanlış mı hemen görürsün, sonra sonraki soruya geçersin.</p>
 
   <div id="select-area">
     <div class="test-grid">
@@ -107,8 +107,12 @@
       <button class="test-btn" data-test="4" type="button"><b>Test 4</b><span>Rakamlar, hız sınırları, alkol, güvenli sürüş</span></button>
       <button class="test-btn" data-test="5" type="button"><b>Test 5</b><span>Otoyol, yolu paylaşma, kaza sonrası</span></button>
       <button class="test-btn" data-test="6" type="button"><b>Test 6 — İşaretler</b><span>Sadece işaretler — resimli sorular</span></button>
+      <button class="test-btn" data-test="7" type="button"><b>Test 7</b><span>İşaretler ve yol çizgileri — yazılı sorular</span></button>
+      <button class="test-btn" data-test="8" type="button"><b>Test 8</b><span>Alkol, uyuşturucu, cezalar ve askı</span></button>
+      <button class="test-btn" data-test="9" type="button"><b>Test 9</b><span>Gece, kötü hava ve acil durumlar</span></button>
+      <button class="test-btn" data-test="10" type="button"><b>Test 10</b><span>Karışık final — tüm konulardan</span></button>
     </div>
-    <p class="select-note">Test 1–5: 36 soru, baraj 30 doğru. Test 6 (İşaretler): 36 soru, baraj 30 doğru.</p>
+    <p class="select-note">Her test: 36 soru, baraj 30 doğru. Test 6 (İşaretler): 36 resimli soru.</p>
     <div id="history-area" class="history hidden">
       <h2>Sonuçların</h2>
       <div id="history-list"></div>
@@ -148,6 +152,10 @@
 <script src="tests-data-4.js"></script>
 <script src="tests-data-5.js"></script>
 <script src="tests-data-6.js"></script>
+<script src="tests-data-7.js"></script>
+<script src="tests-data-8.js"></script>
+<script src="tests-data-9.js"></script>
+<script src="tests-data-10.js"></script>
 <script>
 let QUESTIONS = [
   { q: "Kaliforniya'da 21 yaş ve üzeri sürücüler için yasal alkol sınırı (BAC) nedir?",
@@ -260,7 +268,7 @@ let QUESTIONS = [
     explain: "İlk DUI'da bile para cezası, ehliyetin askıya alınması ve zorunlu DUI eğitim programı uygulanır; tekrarında cezalar ağırlaşır." }
 ];
 
-const TESTS = { 1: QUESTIONS, 2: TEST_2, 3: TEST_3, 4: TEST_4, 5: TEST_5, 6: TEST_6 };
+const TESTS = { 1: QUESTIONS, 2: TEST_2, 3: TEST_3, 4: TEST_4, 5: TEST_5, 6: TEST_6, 7: TEST_7, 8: TEST_8, 9: TEST_9, 10: TEST_10 };
 let currentTest = 1;
 
 function startTest(n) {
